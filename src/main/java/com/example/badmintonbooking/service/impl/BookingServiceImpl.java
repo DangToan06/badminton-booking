@@ -8,6 +8,7 @@ import com.example.badmintonbooking.entity.Booking;
 import com.example.badmintonbooking.entity.Court;
 import com.example.badmintonbooking.enums.BookingStatus;
 import com.example.badmintonbooking.exception.BookingConflictException;
+import com.example.badmintonbooking.exception.CourtNotAvailableException;
 import com.example.badmintonbooking.exception.ResourceNotFoundException;
 import com.example.badmintonbooking.repository.BookingRepository;
 import com.example.badmintonbooking.repository.CourtRepository;
@@ -17,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -47,12 +49,13 @@ public class BookingServiceImpl implements IBookingService {
     private static final BigDecimal PRICE_PER_SLOT = new BigDecimal("120000");
 
     @Override
+    @Transactional
     public BookingDTO createBooking(BookingRequest request, UserPrincipal principal) {
         Court court = courtRepository.findById(request.getCourtId())
                 .orElseThrow(() -> ResourceNotFoundException.of("Court", request.getCourtId()));
 
         if (!court.getIsAvailable()) {
-            throw new RuntimeException("Court is not available for booking");
+            throw new CourtNotAvailableException("Court '" + court.getCourtName() + "' is not available for booking");
         }
 
         if (!ALL_TIME_SLOTS.contains(request.getTimeSlot())) {
@@ -80,7 +83,7 @@ public class BookingServiceImpl implements IBookingService {
 
         Booking booking = Booking.builder()
                 .court(court)
-                .user(principal.getUser())
+                .user(principal.user())
                 .bookingDate(request.getBookingDate())
                 .timeSlot(request.getTimeSlot())
                 .totalPrice(PRICE_PER_SLOT)
@@ -107,7 +110,6 @@ public class BookingServiceImpl implements IBookingService {
             );
         }
 
-        // ── Stream API (bắt buộc theo SRS UC-02) ──────────────────────────
         List<BookingDTO> dtos = bookingPage.getContent()
                 .stream()
                 .filter(b -> b != null)
@@ -135,12 +137,10 @@ public class BookingServiceImpl implements IBookingService {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> ResourceNotFoundException.of("Booking", bookingId));
 
-        // Kiểm tra quyền sở hữu
         if (!booking.getUser().getId().equals(principal.user().getId())) {
             throw new RuntimeException("You don't have permission to cancel this booking");
         }
 
-        // Chỉ PENDING mới hủy được (CONFIRMED phải liên hệ Manager)
         if (booking.getStatus() != BookingStatus.PENDING) {
             throw new RuntimeException(
                     "Cannot cancel booking with status: " + booking.getStatus() +

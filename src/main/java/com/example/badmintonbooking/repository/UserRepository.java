@@ -42,5 +42,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Modifying
     @Transactional
     @Query("UPDATE User u SET u.isEnabled = :isEnabled WHERE u.id = :id")
-    int updateEnabledStatus(@Param("id") Long id, @Param("isEnabled") Boolean isEnabled);
+    void updateEnabledStatus(@Param("id") Long id, @Param("isEnabled") Boolean isEnabled);
 }

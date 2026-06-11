@@ -77,8 +77,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(
                                 principal,
-                                null,                        // credentials null vì đã xác thực qua JWT
-                                principal.getAuthorities()   // ["ROLE_ADMIN"] / ["ROLE_CUSTOMER"] ...
+                                null,
+                                principal.getAuthorities()
                         );
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
