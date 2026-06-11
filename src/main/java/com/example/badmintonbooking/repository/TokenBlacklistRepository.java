@@ -1,0 +1,9 @@
+package com.example.badmintonbooking.repository;
+
+import com.example.badmintonbooking.entity.TokenBlacklist;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface TokenBlacklistRepository extends JpaRepository<TokenBlacklist, Long> {
+
+    boolean existsByToken(String token);
+}
