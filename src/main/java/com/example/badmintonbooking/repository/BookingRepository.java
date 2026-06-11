@@ -4,6 +4,7 @@ import com.example.badmintonbooking.entity.Booking;
 import com.example.badmintonbooking.enums.BookingStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -29,14 +30,17 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             @Param("timeSlot") String timeSlot
     );
 
+    @EntityGraph(attributePaths = {"user", "court", "court.cluster"})
     Page<Booking> findByUserIdOrderByCreatedAtDesc(Long userId, Pageable pageable);
 
+    @EntityGraph(attributePaths = {"user", "court", "court.cluster"})
     Page<Booking> findByUserIdAndStatusOrderByCreatedAtDesc(
             Long userId,
             BookingStatus status,
             Pageable pageable
     );
 
+    @EntityGraph(attributePaths = {"user", "court", "court.cluster"})
     @Query("""
         SELECT b FROM Booking b
         WHERE b.court.cluster.id = :clusterId
@@ -56,6 +60,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     @Query("UPDATE Booking b SET b.status = :status WHERE b.id = :id")
     void updateStatus(@Param("id") Long id, @Param("status") BookingStatus status);
 
+    @EntityGraph(attributePaths = {"user", "court", "court.cluster"})
     @Query("""
         SELECT b FROM Booking b
         WHERE b.court.cluster.id = :clusterId

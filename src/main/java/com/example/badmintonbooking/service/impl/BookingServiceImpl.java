@@ -8,7 +8,6 @@ import com.example.badmintonbooking.entity.Booking;
 import com.example.badmintonbooking.entity.Court;
 import com.example.badmintonbooking.enums.BookingStatus;
 import com.example.badmintonbooking.exception.BookingConflictException;
-import com.example.badmintonbooking.exception.CourtNotAvailableException;
 import com.example.badmintonbooking.exception.ResourceNotFoundException;
 import com.example.badmintonbooking.repository.BookingRepository;
 import com.example.badmintonbooking.repository.CourtRepository;
@@ -55,7 +54,7 @@ public class BookingServiceImpl implements IBookingService {
                 .orElseThrow(() -> ResourceNotFoundException.of("Court", request.getCourtId()));
 
         if (!court.getIsAvailable()) {
-            throw new CourtNotAvailableException("Court '" + court.getCourtName() + "' is not available for booking");
+            throw new RuntimeException("Court is not available");
         }
 
         if (!ALL_TIME_SLOTS.contains(request.getTimeSlot())) {
