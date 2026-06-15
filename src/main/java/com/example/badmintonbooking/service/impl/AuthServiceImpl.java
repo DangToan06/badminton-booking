@@ -114,6 +114,10 @@ public class AuthServiceImpl implements IAuthService {
             throw new RuntimeException("Invalid refresh token");
         }
 
+        if(redisTokenBlacklistService.isBlacklisted(refreshToken)){
+            throw new RuntimeException("Refresh token is blacklisted");
+        }
+
         String newAccessToken = jwtService.generateAccessToken(userPrincipal);
 
         return AuthResponse.builder()
@@ -126,11 +130,13 @@ public class AuthServiceImpl implements IAuthService {
     }
 
     @Override
-    public void logout(String authorizationHeader, UserPrincipal principal) {
+    public void logout(String authorizationHeader, RefreshTokenRequest request, UserPrincipal principal) {
         String token = authorizationHeader.substring(7);
+        String refreshToken = request.getRefreshToken();
 
         redisTokenBlacklistService.addToBlacklist(token, jwtService.extractExpiration(token).getTime());
+        redisTokenBlacklistService.addToBlacklist(refreshToken, jwtService.extractExpiration(refreshToken).getTime());
 
-        log.info("Token blacklisted for user: '{}'", principal.getUsername());
+        log.info("Tokens blacklisted for user: '{}'", principal.getUsername());
     }
 }

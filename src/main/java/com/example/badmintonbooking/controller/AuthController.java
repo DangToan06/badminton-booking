@@ -56,9 +56,10 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<ApiResponse<AuthResponse>> logout(
             @RequestHeader("Authorization") String authorizationHeader,
+            @Valid @RequestBody RefreshTokenRequest request,
             @AuthenticationPrincipal UserPrincipal principal
     ){
-        authService.logout(authorizationHeader, principal);
+        authService.logout(authorizationHeader, request, principal);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success("Logged out successfully"));

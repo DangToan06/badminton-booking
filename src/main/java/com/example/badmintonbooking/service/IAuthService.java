@@ -14,5 +14,5 @@ public interface IAuthService {
 
     AuthResponse refresh(RefreshTokenRequest request);
 
-    void logout(String authorizationHeader, UserPrincipal principal);
+    void logout(String authorizationHeader, RefreshTokenRequest request, UserPrincipal principal);
 }
