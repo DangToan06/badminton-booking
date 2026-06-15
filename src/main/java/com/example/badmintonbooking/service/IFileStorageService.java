@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface IFileStorageService {
 
-    FileUploadResponse uploadCourtImage(Long courtId, MultipartFile file);
+    List<FileUploadResponse> uploadCourtImages(Long courtId, List<MultipartFile> files);
 
 
 

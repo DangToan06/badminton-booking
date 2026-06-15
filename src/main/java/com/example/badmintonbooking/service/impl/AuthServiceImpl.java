@@ -4,10 +4,9 @@ import com.example.badmintonbooking.dto.request.LoginRequest;
 import com.example.badmintonbooking.dto.request.RefreshTokenRequest;
 import com.example.badmintonbooking.dto.response.AuthResponse;
 import com.example.badmintonbooking.dto.request.RegisterRequest;
-import com.example.badmintonbooking.entity.TokenBlacklist;
+import com.example.badmintonbooking.service.RedisTokenBlacklistService;
 import com.example.badmintonbooking.entity.User;
 import com.example.badmintonbooking.enums.Role;
-import com.example.badmintonbooking.repository.TokenBlacklistRepository;
 import com.example.badmintonbooking.repository.UserRepository;
 import com.example.badmintonbooking.security.jwt.JwtService;
 import com.example.badmintonbooking.security.principal.UserPrincipal;
@@ -27,10 +26,10 @@ import org.springframework.stereotype.Service;
 public class AuthServiceImpl implements IAuthService {
 
     private final UserRepository userRepository;
-    private final TokenBlacklistRepository tokenBlacklistRepository;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
+    private final RedisTokenBlacklistService redisTokenBlacklistService;
 
 
     @Override
@@ -130,13 +129,8 @@ public class AuthServiceImpl implements IAuthService {
     public void logout(String authorizationHeader, UserPrincipal principal) {
         String token = authorizationHeader.substring(7);
 
-        TokenBlacklist blacklistedToken = TokenBlacklist.builder()
-                .token(token)
-                .expiryTime(jwtService.extractExpirationAsLocalDateTime(token))
-                .user(principal.user())
-                .build();
+        redisTokenBlacklistService.addToBlacklist(token, jwtService.extractExpiration(token).getTime());
 
-        tokenBlacklistRepository.save(blacklistedToken);
         log.info("Token blacklisted for user: '{}'", principal.getUsername());
     }
 }

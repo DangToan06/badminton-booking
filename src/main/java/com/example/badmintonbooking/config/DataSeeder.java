@@ -162,7 +162,6 @@ public class DataSeeder implements ApplicationRunner {
         courtRepository.save(Court.builder()
                 .courtName("Sân A1")
                 .type("Standard")
-                .imageUrl("https://res.cloudinary.com/demo/image/upload/court_a1.jpg")
                 .isAvailable(true)
                 .cluster(cluster)
                 .build());
@@ -171,7 +170,6 @@ public class DataSeeder implements ApplicationRunner {
         courtRepository.save(Court.builder()
                 .courtName("Sân A2")
                 .type("VIP")
-                .imageUrl("https://res.cloudinary.com/demo/image/upload/court_a2.jpg")
                 .isAvailable(true)
                 .cluster(cluster)
                 .build());
@@ -180,8 +178,7 @@ public class DataSeeder implements ApplicationRunner {
         courtRepository.save(Court.builder()
                 .courtName("Sân A3")
                 .type("Standard")
-                .imageUrl("https://res.cloudinary.com/demo/image/upload/court_a3.jpg")
-                .isAvailable(false)   // Đang bảo trì → dùng để test case này
+                .isAvailable(false)
                 .cluster(cluster)
                 .build());
     }
@@ -196,7 +193,6 @@ public class DataSeeder implements ApplicationRunner {
         courtRepository.save(Court.builder()
                 .courtName("Sân B1")
                 .type("Standard")
-                .imageUrl("https://res.cloudinary.com/demo/image/upload/court_b1.jpg")
                 .isAvailable(true)
                 .cluster(cluster)
                 .build());
@@ -205,7 +201,6 @@ public class DataSeeder implements ApplicationRunner {
         courtRepository.save(Court.builder()
                 .courtName("Sân B2")
                 .type("Outdoor")
-                .imageUrl("https://res.cloudinary.com/demo/image/upload/court_b2.jpg")
                 .isAvailable(true)
                 .cluster(cluster)
                 .build());
@@ -214,7 +209,6 @@ public class DataSeeder implements ApplicationRunner {
         courtRepository.save(Court.builder()
                 .courtName("Sân B3")
                 .type("VIP")
-                .imageUrl("https://res.cloudinary.com/demo/image/upload/court_b3.jpg")
                 .isAvailable(true)
                 .cluster(cluster)
                 .build());

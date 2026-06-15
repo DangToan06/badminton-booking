@@ -23,8 +23,8 @@ public class Court {
     @Column(length = 50)
     private String type;
 
-    @Column(name = "image_url", length = 255)
-    private String imageUrl;
+    @OneToMany(mappedBy = "court", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CourtImage> images;
 
     @Column(name = "is_available", nullable = false)
     @Builder.Default

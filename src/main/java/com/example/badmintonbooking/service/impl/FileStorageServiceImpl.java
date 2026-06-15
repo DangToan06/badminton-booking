@@ -4,9 +4,11 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.example.badmintonbooking.dto.response.FileUploadResponse;
 import com.example.badmintonbooking.entity.Court;
+import com.example.badmintonbooking.entity.CourtImage;
 import com.example.badmintonbooking.exception.CloudStorageException;
 import com.example.badmintonbooking.exception.CustomExceptions;
 import com.example.badmintonbooking.repository.CourtRepository;
+import com.example.badmintonbooking.repository.CourtImageRepository;
 import com.example.badmintonbooking.service.IFileStorageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +28,7 @@ public class FileStorageServiceImpl implements IFileStorageService {
 
     private final Cloudinary cloudinary;
     private final CourtRepository courtRepository;
+    private final CourtImageRepository courtImageRepository;
 
     private static final List<String> ALLOWED_TYPES = Arrays.asList(
             "image/jpeg", "image/jpg", "image/png", "image/webp"
@@ -33,22 +37,33 @@ public class FileStorageServiceImpl implements IFileStorageService {
     private static final long MAX_FILE_SIZE = 5 * 1024 * 1024L;
 
     @Override
-    public FileUploadResponse uploadCourtImage(Long courtId, MultipartFile file) {
+    public List<FileUploadResponse> uploadCourtImages(Long courtId, List<MultipartFile> files) {
         Court court = courtRepository.findById(courtId)
                 .orElseThrow(() -> new CustomExceptions.CourtNotFoundException(courtId));
 
-        validateFile(file);
+        List<FileUploadResponse> responses = new ArrayList<>();
 
-        String imageUrl = uploadToCloudinary(file, courtId);
+        for (MultipartFile file : files) {
+            validateFile(file);
 
-        courtRepository.updateImageUrl(courtId, imageUrl);
-        log.info("Updated image for court '{}' (id: {}) → {}", court.getCourtName(), courtId, imageUrl);
+            String imageUrl = uploadToCloudinary(file, courtId);
 
-        return FileUploadResponse.builder()
-                .courtId(courtId)
-                .courtName(court.getCourtName())
-                .imageUrl(imageUrl)
-                .build();
+            CourtImage courtImage = CourtImage.builder()
+                    .imageUrl(imageUrl)
+                    .court(court)
+                    .build();
+            courtImageRepository.save(courtImage);
+            
+            log.info("Saved image for court '{}' (id: {}) → {}", court.getCourtName(), courtId, imageUrl);
+
+            responses.add(FileUploadResponse.builder()
+                    .courtId(courtId)
+                    .courtName(court.getCourtName())
+                    .imageUrl(imageUrl)
+                    .build());
+        }
+
+        return responses;
     }
 
     private void validateFile(MultipartFile file) {

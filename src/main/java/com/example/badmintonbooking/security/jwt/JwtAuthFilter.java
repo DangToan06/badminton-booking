@@ -1,6 +1,6 @@
 package com.example.badmintonbooking.security.jwt;
 
-import com.example.badmintonbooking.repository.TokenBlacklistRepository;
+import com.example.badmintonbooking.service.RedisTokenBlacklistService;
 import com.example.badmintonbooking.security.principal.UserDetailsServiceImpl;
 import com.example.badmintonbooking.security.principal.UserPrincipal;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -28,7 +28,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserDetailsServiceImpl userDetailsService;
-    private final TokenBlacklistRepository tokenBlacklistRepository;
+    private final RedisTokenBlacklistService redisTokenBlacklistService;
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
@@ -61,7 +61,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         // Kiểm tra Blacklist (token đã bị thu hồi khi Logout)
         // Trả về 403 Forbidden dù token còn hạn
-        if (tokenBlacklistRepository.existsByToken(jwt)) {
+        if (redisTokenBlacklistService.isBlacklisted(jwt)) {
             log.warn("Token is blacklisted for user: {}", username);
             sendErrorResponse(response, HttpServletResponse.SC_FORBIDDEN, "Token has been revoked");
             return;

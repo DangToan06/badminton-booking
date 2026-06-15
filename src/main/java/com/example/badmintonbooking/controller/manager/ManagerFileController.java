@@ -10,6 +10,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/manager/courts")
 @RequiredArgsConstructor
@@ -18,15 +20,16 @@ public class ManagerFileController {
 
     private final IFileStorageService fileStorageService;
 
+    // Trả về 415 nếu k đúng định dạng khai báo trong consumer
     @PostMapping(
             value = "/{courtId}/image",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
     )
-    public ResponseEntity<ApiResponse<FileUploadResponse>> uploadCourtImage(
+    public ResponseEntity<ApiResponse<List<FileUploadResponse>>> uploadCourtImage(
             @PathVariable Long courtId,
-            @RequestParam("file") MultipartFile file) {
+            @RequestParam("files") List<MultipartFile> files) {
 
-        FileUploadResponse result = fileStorageService.uploadCourtImage(courtId, file);
+        List<FileUploadResponse> result = fileStorageService.uploadCourtImages(courtId, files);
 
         return ResponseEntity.ok(
                 ApiResponse.success("Image uploaded successfully", result)

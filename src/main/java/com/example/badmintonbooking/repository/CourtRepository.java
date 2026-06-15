@@ -10,11 +10,4 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public interface CourtRepository extends JpaRepository<Court, Long> {
-    @Modifying
-    @Transactional
-    @Query("UPDATE Court c SET c.imageUrl = :imageUrl WHERE c.id = :courtId")
-    void updateImageUrl(
-            @Param("courtId") Long courtId,
-            @Param("imageUrl") String imageUrl
-    );
 }
